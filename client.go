@@ -28,7 +28,6 @@ import (
 	"strconv"
 
 	"github.com/go-chassis/foundation/httpclient"
-	"github.com/go-chassis/foundation/security"
 	"github.com/go-chassis/openlog"
 )
 
@@ -73,7 +72,6 @@ var (
 //it is concurrency safe
 type Client struct {
 	opts            Config
-	cipher          security.Cipher
 	c               *httpclient.Requests
 	currentRevision int
 }
@@ -273,6 +271,42 @@ func (c *Client) Delete(ctx context.Context, kvID string, opts ...OpOption) erro
 		return fmt.Errorf("delete %s failed,http status [%s], body [%s]", kvID, resp.Status, b)
 	}
 	return nil
+}
+
+//Get get value of a key by id
+func (c *Client) Get(ctx context.Context, kvID string, opts ...GetOption) (*KVDoc, error) {
+	options := GetOptions{}
+	for _, o := range opts {
+		o(&options)
+	}
+	if options.Project == "" {
+		options.Project = defaultProject
+	}
+	url := fmt.Sprintf(APIFmt, c.opts.Endpoint, version, options.Project, APIPathKV,
+		kvID)
+	h := http.Header{}
+	h.Set(HeaderContentType, ContentTypeJSON)
+	resp, err := c.c.Do(ctx, http.MethodGet, url, h, nil)
+	if err != nil {
+		return nil, err
+	}
+	b := ReadBody(resp)
+	if resp.StatusCode != http.StatusOK {
+		openlog.Error(MsgOpFailed, openlog.WithTags(openlog.Tags{
+			"id":     kvID,
+			"status": resp.Status,
+			"body":   b,
+		}))
+		return nil, fmt.Errorf(FmtOpFailed, kvID, resp.Status, b)
+	}
+
+	var kv *KVDoc
+	err = json.Unmarshal(b, &kv)
+	if err != nil {
+		openlog.Error("unmarshal kv failed:" + err.Error())
+		return nil, err
+	}
+	return kv, nil
 }
 
 //CurrentRevision return the current local revision of kie, which is updated during the last polling request

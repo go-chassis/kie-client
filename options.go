@@ -46,9 +46,7 @@ type OpOptions struct {
 //WithLabels query kv by labels
 func WithLabels(l ...map[string]string) GetOption {
 	return func(options *GetOptions) {
-		for _, labels := range l {
-			options.Labels = append(options.Labels, labels)
-		}
+		options.Labels = append(options.Labels, l...)
 	}
 }
 
