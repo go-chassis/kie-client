@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/go-chassis/foundation/httpclient"
 	"github.com/go-chassis/openlog"
@@ -81,6 +82,10 @@ type Config struct {
 	Endpoint      string
 	DefaultLabels map[string]string
 	VerifyPeer    bool //TODO make it works, now just keep it false
+}
+
+type DeleteBody struct {
+	IDs []string `json:"ids"`
 }
 
 //NewClient create a client
@@ -250,7 +255,7 @@ func (c *Client) List(ctx context.Context, opts ...GetOption) (*KVResponse, int,
 }
 
 //Delete remove kv
-func (c *Client) Delete(ctx context.Context, kvID string, opts ...OpOption) error {
+func (c *Client) Delete(ctx context.Context, kvIDs string, opts ...OpOption) error {
 	options := OpOptions{}
 	for _, o := range opts {
 		o(&options)
@@ -258,17 +263,27 @@ func (c *Client) Delete(ctx context.Context, kvID string, opts ...OpOption) erro
 	if options.Project == "" {
 		options.Project = defaultProject
 	}
-	url := fmt.Sprintf(APIFmt, c.opts.Endpoint, version, options.Project, APIPathKV,
-		kvID)
+	var deleteURL string
+	var body []byte
+	if strings.Contains(kvIDs, ",") {
+		deleteURL = fmt.Sprintf("%s/%s/%s/%s", c.opts.Endpoint, version, options.Project, APIPathKV)
+		kvs := DeleteBody{
+			IDs: strings.Split(kvIDs, ","),
+		}
+		body, _ = json.Marshal(kvs)
+	} else {
+		deleteURL = fmt.Sprintf(APIFmt, c.opts.Endpoint, version, options.Project, APIPathKV,
+			kvIDs)
+	}
 	h := http.Header{}
 	h.Set(HeaderContentType, ContentTypeJSON)
-	resp, err := c.c.Do(ctx, http.MethodDelete, url, h, nil)
+	resp, err := c.c.Do(ctx, http.MethodDelete, deleteURL, h, body)
 	if err != nil {
 		return err
 	}
 	b := ReadBody(resp)
 	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("delete %s failed,http status [%s], body [%s]", kvID, resp.Status, b)
+		return fmt.Errorf("delete %s failed,http status [%s], body [%s]", kvIDs, resp.Status, b)
 	}
 	return nil
 }
