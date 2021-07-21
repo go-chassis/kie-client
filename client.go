@@ -217,7 +217,7 @@ func (c *Client) List(ctx context.Context, authorization []string, opts ...GetOp
 		url = url + labels
 	}
 	h := http.Header{}
-	if len(authorization) != 0 {
+	if authorization != nil && len(authorization) != 0 {
 		h = make(http.Header)
 		h["authorization"] = authorization
 	}
