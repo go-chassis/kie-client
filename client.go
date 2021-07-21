@@ -187,7 +187,7 @@ func (c *Client) Put(ctx context.Context, kv KVRequest, opts ...OpOption) (*KVDo
 }
 
 //List get value of a key
-func (c *Client) List(ctx context.Context, opts ...GetOption) (*KVResponse, int, error) {
+func (c *Client) List(ctx context.Context, authorization string, opts ...GetOption) (*KVResponse, int, error) {
 	options := GetOptions{}
 	for _, o := range opts {
 		o(&options)
@@ -217,6 +217,10 @@ func (c *Client) List(ctx context.Context, opts ...GetOption) (*KVResponse, int,
 		url = url + labels
 	}
 	h := http.Header{}
+	if authorization != "" {
+		h = make(http.Header)
+		h["authorization"] = []string{authorization}
+	}
 	resp, err := c.c.Do(ctx, http.MethodGet, url, h, nil)
 	if err != nil {
 		return nil, -1, err
