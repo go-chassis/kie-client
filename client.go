@@ -44,7 +44,7 @@ const (
 const (
 	HeaderRevision    = "X-Kie-Revision"
 	HeaderContentType = "Content-Type"
-	HeaderAuth        = "authorization"
+	HeaderAuth        = "Authorization"
 )
 
 //ContentType
