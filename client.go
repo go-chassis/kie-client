@@ -44,6 +44,7 @@ const (
 const (
 	HeaderRevision    = "X-Kie-Revision"
 	HeaderContentType = "Content-Type"
+	HeaderAuth        = "authorization"
 )
 
 //ContentType
@@ -121,8 +122,7 @@ func (c *Client) Create(ctx context.Context, kv KVRequest, opts ...OpOption) (*K
 		options.Project = defaultProject
 	}
 	url := fmt.Sprintf("%s/%s/%s/%s", c.opts.Endpoint, version, options.Project, APIPathKV)
-	h := http.Header{}
-	h.Set(HeaderContentType, ContentTypeJSON)
+	h := Headers(ctx)
 	body, _ := json.Marshal(kv)
 	resp, err := c.c.Do(ctx, http.MethodPost, url, h, body)
 	if err != nil {
@@ -160,8 +160,7 @@ func (c *Client) Put(ctx context.Context, kv KVRequest, opts ...OpOption) (*KVDo
 		return nil, ErrIDEmpty
 	}
 	url := fmt.Sprintf(APIFmt, c.opts.Endpoint, version, options.Project, APIPathKV, kv.ID)
-	h := http.Header{}
-	h.Set(HeaderContentType, ContentTypeJSON)
+	h := Headers(ctx)
 	body, _ := json.Marshal(kv)
 	resp, err := c.c.Do(ctx, http.MethodPut, url, h, body)
 	if err != nil {
@@ -216,11 +215,7 @@ func (c *Client) List(ctx context.Context, authorization []string, opts ...GetOp
 		}
 		url = url + labels
 	}
-	h := http.Header{}
-	if authorization != nil && len(authorization) != 0 {
-		h = make(http.Header)
-		h["authorization"] = authorization
-	}
+	h := Headers(ctx)
 	resp, err := c.c.Do(ctx, http.MethodGet, url, h, nil)
 	if err != nil {
 		return nil, -1, err
@@ -279,8 +274,7 @@ func (c *Client) Delete(ctx context.Context, kvIDs string, opts ...OpOption) err
 		deleteURL = fmt.Sprintf(APIFmt, c.opts.Endpoint, version, options.Project, APIPathKV,
 			kvIDs)
 	}
-	h := http.Header{}
-	h.Set(HeaderContentType, ContentTypeJSON)
+	h := Headers(ctx)
 	resp, err := c.c.Do(ctx, http.MethodDelete, deleteURL, h, body)
 	if err != nil {
 		return err
@@ -303,8 +297,7 @@ func (c *Client) Get(ctx context.Context, kvID string, opts ...GetOption) (*KVDo
 	}
 	url := fmt.Sprintf(APIFmt, c.opts.Endpoint, version, options.Project, APIPathKV,
 		kvID)
-	h := http.Header{}
-	h.Set(HeaderContentType, ContentTypeJSON)
+	h := Headers(ctx)
 	resp, err := c.c.Do(ctx, http.MethodGet, url, h, nil)
 	if err != nil {
 		return nil, err
