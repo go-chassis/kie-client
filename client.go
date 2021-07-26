@@ -186,7 +186,7 @@ func (c *Client) Put(ctx context.Context, kv KVRequest, opts ...OpOption) (*KVDo
 }
 
 //List get value of a key
-func (c *Client) List(ctx context.Context, authorization []string, opts ...GetOption) (*KVResponse, int, error) {
+func (c *Client) List(ctx context.Context, opts ...GetOption) (*KVResponse, int, error) {
 	options := GetOptions{}
 	for _, o := range opts {
 		o(&options)
