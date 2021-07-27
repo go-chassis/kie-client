@@ -16,10 +16,15 @@
 
 package kie
 
-import "strconv"
+import (
+	"errors"
+	"net/http"
+	"strconv"
+)
 
 const (
 	defaultProject = "default"
+	headerAuth     = "Authorization"
 )
 
 //GetOption is the functional option of client func
@@ -30,17 +35,26 @@ type OpOption func(*OpOptions)
 
 //GetOptions is the options of client func
 type GetOptions struct {
-	Labels   []map[string]string
-	Project  string
-	Key      string
-	Wait     string
-	Exact    bool
-	Revision string
+	Labels      []map[string]string
+	Project     string
+	Key         string
+	Wait        string
+	Exact       bool
+	Revision    string
+	SignRequest func(*http.Request) error
 }
 
 //OpOptions is the options of client func
 type OpOptions struct {
 	Project string
+}
+
+func SignRequest(r *http.Request) error {
+	headers := r.Header
+	if headers[headerAuth] == nil {
+		return errors.New("No authorization header ")
+	}
+	return nil
 }
 
 //WithLabels query kv by labels

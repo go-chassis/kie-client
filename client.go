@@ -44,7 +44,6 @@ const (
 const (
 	HeaderRevision    = "X-Kie-Revision"
 	HeaderContentType = "Content-Type"
-	HeaderAuth        = "Authorization"
 )
 
 //ContentType
@@ -122,7 +121,8 @@ func (c *Client) Create(ctx context.Context, kv KVRequest, opts ...OpOption) (*K
 		options.Project = defaultProject
 	}
 	url := fmt.Sprintf("%s/%s/%s/%s", c.opts.Endpoint, version, options.Project, APIPathKV)
-	h := Headers(ctx)
+	h := http.Header{}
+	h.Set(HeaderContentType, ContentTypeJSON)
 	body, _ := json.Marshal(kv)
 	resp, err := c.c.Do(ctx, http.MethodPost, url, h, body)
 	if err != nil {
@@ -160,7 +160,8 @@ func (c *Client) Put(ctx context.Context, kv KVRequest, opts ...OpOption) (*KVDo
 		return nil, ErrIDEmpty
 	}
 	url := fmt.Sprintf(APIFmt, c.opts.Endpoint, version, options.Project, APIPathKV, kv.ID)
-	h := Headers(ctx)
+	h := http.Header{}
+	h.Set(HeaderContentType, ContentTypeJSON)
 	body, _ := json.Marshal(kv)
 	resp, err := c.c.Do(ctx, http.MethodPut, url, h, body)
 	if err != nil {
@@ -215,7 +216,7 @@ func (c *Client) List(ctx context.Context, opts ...GetOption) (*KVResponse, int,
 		}
 		url = url + labels
 	}
-	h := Headers(ctx)
+	h := http.Header{}
 	resp, err := c.c.Do(ctx, http.MethodGet, url, h, nil)
 	if err != nil {
 		return nil, -1, err
@@ -274,7 +275,8 @@ func (c *Client) Delete(ctx context.Context, kvIDs string, opts ...OpOption) err
 		deleteURL = fmt.Sprintf(APIFmt, c.opts.Endpoint, version, options.Project, APIPathKV,
 			kvIDs)
 	}
-	h := Headers(ctx)
+	h := http.Header{}
+	h.Set(HeaderContentType, ContentTypeJSON)
 	resp, err := c.c.Do(ctx, http.MethodDelete, deleteURL, h, body)
 	if err != nil {
 		return err
@@ -297,7 +299,8 @@ func (c *Client) Get(ctx context.Context, kvID string, opts ...GetOption) (*KVDo
 	}
 	url := fmt.Sprintf(APIFmt, c.opts.Endpoint, version, options.Project, APIPathKV,
 		kvID)
-	h := Headers(ctx)
+	h := http.Header{}
+	h.Set(HeaderContentType, ContentTypeJSON)
 	resp, err := c.c.Do(ctx, http.MethodGet, url, h, nil)
 	if err != nil {
 		return nil, err
