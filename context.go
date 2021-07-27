@@ -21,15 +21,16 @@ import (
 	"net/http"
 )
 
-// WithAuthContext
 func WithAuthContext(ctx context.Context, token string) context.Context {
 	return context.WithValue(ctx, HeaderAuth, token)
 }
 
 func Headers(ctx context.Context) http.Header {
+	h := http.Header{}
+	h.Set(HeaderContentType, ContentTypeJSON)
 	token := ctx.Value(HeaderAuth)
-	return http.Header{
-		HeaderAuth:        []string{token.(string)},
-		HeaderContentType: []string{ContentTypeJSON},
+	if token != nil {
+		h.Set(HeaderAuth, token.(string))
 	}
+	return h
 }
