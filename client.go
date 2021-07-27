@@ -95,6 +95,7 @@ func NewClient(config Config) (*Client, error) {
 		return nil, err
 	}
 	httpOpts := &httpclient.Options{}
+	httpOpts.SignRequest = SignRequest
 	if u.Scheme == schemeHTTPS {
 		// #nosec
 		httpOpts.TLSConfig = &tls.Config{
