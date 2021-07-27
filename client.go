@@ -112,6 +112,15 @@ func NewClient(config Config) (*Client, error) {
 	}, nil
 }
 
+//SignRequest sign a http request so that it can talk to API server
+func SignRequest(r *http.Request) error {
+	headers := r.Header
+	if headers[headerAuth] == nil {
+		return errors.New("No authorization header ")
+	}
+	return nil
+}
+
 //Create create value of a key
 func (c *Client) Create(ctx context.Context, kv KVRequest, opts ...OpOption) (*KVDoc, error) {
 	options := OpOptions{}
