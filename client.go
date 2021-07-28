@@ -82,6 +82,7 @@ type Config struct {
 	Endpoint      string
 	DefaultLabels map[string]string
 	VerifyPeer    bool //TODO make it works, now just keep it false
+	HttpOptions   *httpclient.Options
 }
 
 type DeleteBody struct {
@@ -95,7 +96,9 @@ func NewClient(config Config) (*Client, error) {
 		return nil, err
 	}
 	httpOpts := &httpclient.Options{}
-	httpOpts.SignRequest = SignRequest
+	if config.HttpOptions != nil {
+		httpOpts = config.HttpOptions
+	}
 	if u.Scheme == schemeHTTPS {
 		// #nosec
 		httpOpts.TLSConfig = &tls.Config{
@@ -110,15 +113,6 @@ func NewClient(config Config) (*Client, error) {
 		opts: config,
 		c:    c,
 	}, nil
-}
-
-//SignRequest sign a http request so that it can talk to API server
-func SignRequest(r *http.Request) error {
-	headers := r.Header
-	if headers[headerAuth] == nil {
-		return errors.New("No authorization header ")
-	}
-	return nil
 }
 
 //Create create value of a key

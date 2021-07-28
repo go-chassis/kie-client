@@ -16,13 +16,10 @@
 
 package kie
 
-import (
-	"strconv"
-)
+import "strconv"
 
 const (
 	defaultProject = "default"
-	headerAuth     = "Authorization"
 )
 
 //GetOption is the functional option of client func
