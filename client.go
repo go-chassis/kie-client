@@ -82,6 +82,7 @@ type Config struct {
 	Endpoint      string
 	DefaultLabels map[string]string
 	VerifyPeer    bool //TODO make it works, now just keep it false
+	HttpOptions   *httpclient.Options
 }
 
 type DeleteBody struct {
@@ -95,6 +96,9 @@ func NewClient(config Config) (*Client, error) {
 		return nil, err
 	}
 	httpOpts := &httpclient.Options{}
+	if config.HttpOptions != nil {
+		httpOpts = config.HttpOptions
+	}
 	if u.Scheme == schemeHTTPS {
 		// #nosec
 		httpOpts.TLSConfig = &tls.Config{
