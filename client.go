@@ -99,6 +99,7 @@ func NewClient(config Config) (*Client, error) {
 	if config.HTTPOptions != nil {
 		httpOpts = config.HTTPOptions
 	}
+
 	if u.Scheme == schemeHTTPS {
 		// #nosec
 		httpOpts.TLSConfig = &tls.Config{
