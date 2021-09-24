@@ -22,13 +22,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-chassis/cari/pkg/errsvc"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
+	"github.com/go-chassis/cari/pkg/errsvc"
 	"github.com/go-chassis/foundation/httpclient"
 	"github.com/go-chassis/openlog"
 )
@@ -141,8 +141,8 @@ func (c *Client) Create(ctx context.Context, kv KVRequest, opts ...OpOption) (*K
 			"status": resp.Status,
 			"body":   b,
 		}))
-		err, formatErr := getFormatError(b)
-		if err != nil {
+		formatErr := getFormatError(b)
+		if formatErr == nil {
 			return nil, fmt.Errorf(FmtOpFailed, kv.Key, resp.Status, b)
 		}
 		return nil, formatErr
@@ -184,8 +184,8 @@ func (c *Client) Put(ctx context.Context, kv KVRequest, opts ...OpOption) (*KVDo
 			"status": resp.Status,
 			"body":   b,
 		}))
-		err, formatErr := getFormatError(b)
-		if err != nil {
+		formatErr := getFormatError(b)
+		if formatErr == nil {
 			return nil, fmt.Errorf(FmtOpFailed, kv.Key, resp.Status, b)
 		}
 		return nil, formatErr
@@ -252,8 +252,8 @@ func (c *Client) List(ctx context.Context, opts ...GetOption) (*KVResponse, int,
 			"status": resp.Status,
 			"body":   b,
 		}))
-		err, formatErr := getFormatError(b)
-		if err != nil {
+		formatErr := getFormatError(b)
+		if formatErr == nil {
 			return nil, responseRevision, fmt.Errorf(FmtOpFailed, options.Key, resp.Status, b)
 		}
 		return nil, responseRevision, formatErr
@@ -301,8 +301,8 @@ func (c *Client) Delete(ctx context.Context, kvIDs string, opts ...OpOption) err
 	}
 	b := ReadBody(resp)
 	if resp.StatusCode != http.StatusNoContent {
-		err, formatErr := getFormatError(b)
-		if err != nil {
+		formatErr := getFormatError(b)
+		if formatErr == nil {
 			return fmt.Errorf("delete %s failed,http status [%s], body [%s]", kvIDs, resp.Status, b)
 		}
 		return formatErr
@@ -334,8 +334,8 @@ func (c *Client) Get(ctx context.Context, kvID string, opts ...GetOption) (*KVDo
 			"status": resp.Status,
 			"body":   b,
 		}))
-		err, formatErr := getFormatError(b)
-		if err != nil {
+		formatErr := getFormatError(b)
+		if formatErr == nil {
 			return nil, fmt.Errorf(FmtOpFailed, kvID, resp.Status, b)
 		}
 		return nil, formatErr
@@ -355,10 +355,13 @@ func (c *Client) CurrentRevision() int {
 	return c.currentRevision
 }
 
-func getFormatError(b []byte) (error, error) {
+func getFormatError(b []byte) error {
 	formatErr := &errsvc.Error{}
 	err := json.Unmarshal(b, formatErr)
-	return err, formatErr
+	if err != nil {
+		return nil
+	}
+	return formatErr
 }
 
 // ReadBody read body from the from the response
