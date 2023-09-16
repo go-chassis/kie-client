@@ -16,35 +16,37 @@
 
 package kie
 
-//KVRequest is http request body
+// KVRequest is http request body
 type KVRequest struct {
 	ID        string            `json:"id" yaml:"id"`
 	Key       string            `json:"key" yaml:"key"`
 	Value     string            `json:"value,omitempty" yaml:"value,omitempty"`
 	Status    string            `json:"status,omitempty" yaml:"status,omitempty"`
 	ValueType string            `json:"value_type,omitempty" bson:"value_type,omitempty" yaml:"value_type,omitempty"` //ini,json,text,yaml,properties
+	Priority  int               `json:"priority,omitempty" yaml:"priority,omitempty"`                                 //the smaller value,the higher priority
 	Checker   string            `json:"check,omitempty" yaml:"check,omitempty"`                                       //python script
 	Labels    map[string]string `json:"labels,omitempty" yaml:"labels,omitempty"`                                     //redundant
 }
 
-//KVResponse represents the key value list
+// KVResponse represents the key value list
 type KVResponse struct {
 	LabelDoc *LabelDocResponse `json:"label,omitempty"`
 	Total    int               `json:"total,omitempty"`
 	Data     []*KVDoc          `json:"data,omitempty"`
 }
 
-//LabelDocResponse is label struct
+// LabelDocResponse is label struct
 type LabelDocResponse struct {
 	Labels map[string]string `json:"labels,omitempty"`
 }
 
-//KVDoc is database struct to store kv
+// KVDoc is database struct to store kv
 type KVDoc struct {
 	ID             string `json:"id,omitempty" bson:"id,omitempty" yaml:"id,omitempty" swag:"string"`
 	Key            string `json:"key" yaml:"key"`
 	Value          string `json:"value,omitempty" yaml:"value,omitempty"`
 	ValueType      string `json:"value_type,omitempty" bson:"value_type,omitempty" yaml:"value_type,omitempty"` //ini,json,text,yaml,properties
+	Priority       int    `json:"priority,omitempty" yaml:"priority,omitempty"`                                 //the smaller value,the higher priority
 	Checker        string `json:"check,omitempty" yaml:"check,omitempty"`                                       //python script
 	CreateRevision int64  `json:"create_revision,omitempty" bson:"create_revision," yaml:"create_revision,omitempty"`
 	UpdateRevision int64  `json:"update_revision,omitempty" bson:"update_revision," yaml:"update_revision,omitempty"`
